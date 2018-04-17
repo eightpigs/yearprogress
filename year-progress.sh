@@ -1,53 +1,61 @@
-#!/bin/bash
+#! /bin/bash
 
-year=`date +%Y`
+_year_progress() {
 
-# 
-current=`date +%j`
+    year=`date +%Y`
+    current=`date +%j`
 
-# default common year: 365
-len=365
+    # default common year: 365
+    len=365
 
-# leap year: 366
-if [[ ($(($year%4)) == 0 && $(($year%100)) != 0) || $(($year%400)) == 0 ]] ;then
-    len=366
-fi
+    # leap year: 366
+    if [[ ($(($year%4)) == 0 && $(($year%100)) != 0) || $(($year%400)) == 0 ]] ;then
+        len=366
+    fi
 
-# progress=current/year
-value=`echo "$current $len" | awk '{printf ("%.2f\n",$1/$2)}'`
+    # progress=current/year
+    percent=$(($current*100/$len))
 
-# Get the number of columns in the terminal
-tput init 
-cols=`tput cols`
+    # The information to be displayed is used to calculate the length.
+    info=$percent%'  '$current/$len
 
-val2=$(($current*100/$len))
+    # progress bar length = $COLUMNS - info.length
+    # If there is no $COLUMNS, use tput.
+    if [ -z $COLUMNS ];then  
+        tput init 
+        allCols=`tput cols`
+        cols=$(($allCols-${#info}))
+    else  
+        cols=$(($COLUMNS-${#info}))
+    fi
+
+    # Fill the proportion of the screen
+    scale=`echo "$cols" | awk '{printf ("%.2f\n",$1/100)}'`
+
+    # The length of the progress bar can be shown on a proportional basis.
+    valLen=`echo "$percent $scale" | awk '{printf ("%.0f\n",$1*$2)}'`
+
+    echo 
+
+    echo -n $percent%' '
 
 
-info=$val2%'  '$current/$len
+    # Previous days
+    for ((i=0; i<$valLen; i++))  
+    do
+        echo -n "▓"
+    done
 
-cols=$(($cols-${#info}))
+    # The remaining days
+    for ((i=0; i<$(($cols-$valLen)); i++))  
+    do
+        echo -n "░"
+    done
 
-# Fill the proportion of the screen
-scale=`echo "$cols" | awk '{printf ("%.2f\n",$1/100)}'`
+    echo ' '$current/$len
 
-val=`echo "$val2 $scale" | awk '{printf ("%.0f\n",$1*$2)}'`
+    echo 
+}
 
-echo 
+_year_progress
 
-echo -n $val2%' '
-
-# Previous days
-for ((i=0; i<$val; i++))  
-do
-    echo -n "▓"
-done
-
-# The remaining days
-for ((i=0; i<$((cols-$val)); i ++))  
-do
-    echo -n "░"
-done
-
-echo ' '$current/$len
-
-echo 
