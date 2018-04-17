@@ -4,7 +4,7 @@ Year progress bar inside the terminal
 
 28% ▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░ 104/365
 
-## Feture
+## Feature
 
 - Calculate the length automatically based on the number of columns
 
